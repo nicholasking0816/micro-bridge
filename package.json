@@ -1,0 +1,34 @@
+{
+  "name": "mcr-bridge",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "publish": "rimraf dist && npm run tsc && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicholasking0816/micro-bridge.git"
+  },
+  "keywords": [
+    "Micro-Frontends",
+    "微前端",
+    "vue",
+    "react",
+    "angular",
+    "typescript",
+    "Micro-bridge"
+  ],
+  "author": "nicholasking0816",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicholasking0816/micro-bridge/issues"
+  },
+  "homepage": "https://github.com/nicholasking0816/micro-bridge#readme",
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^4.7.4"
+  }
+}
