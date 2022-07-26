@@ -50,7 +50,7 @@ class BridgePlugin {
                 assetManifest.css = Array.from(new Set(assetManifest.css)); 
 
                 compilation.emitAsset('loadChunks.js', new webpack.sources.RawSource(`
-                    window.$bridge.instance.loadProjectJsonp('${projectName}', ${JSON.stringify(assetManifest)});
+                    window.$mcrBridge.instance.loadProjectJsonp('${projectName}', ${JSON.stringify(assetManifest)});
                 `, false))
                 callback()
             })
