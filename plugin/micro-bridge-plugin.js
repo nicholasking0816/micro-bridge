@@ -15,6 +15,7 @@ class BridgePlugin {
                     css: []
                 }
                 const prefix = this._options.prefix || '';
+                const projectName = this._options.projectName;
                 compilation.entrypoints.forEach(entrypoint => {
                     const assets = entrypoint.getFiles();
                     assets.forEach(asset => {
@@ -45,9 +46,11 @@ class BridgePlugin {
                     }
                     assetManifest[key] = assetManifest[key].map(file => prefix + file)
                 })
+                assetManifest.js = Array.from(new Set(assetManifest.js));
+                assetManifest.css = Array.from(new Set(assetManifest.css)); 
 
                 compilation.emitAsset('loadChunks.js', new webpack.sources.RawSource(`
-                    window.$bridge.instance.loadProjectJsonp('vue_app', ${JSON.stringify(assetManifest)});
+                    window.$bridge.instance.loadProjectJsonp('${projectName}', ${JSON.stringify(assetManifest)});
                 `, false))
                 callback()
             })

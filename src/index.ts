@@ -100,13 +100,16 @@ export class MicroBridge {
     }
 
     mountNgCpnt(cpntProfile: any, cpntAnchor: HTMLElement) {
-        return {
-            componentInstance: cpntProfile.componentRef.instance,
-            componentRef: cpntProfile.componentRef,
-            destroy() {
-                cpntProfile.componentRef.destroy();
+        return cpntProfile.componentRefPromise.then(componentRef => {
+            cpntAnchor.appendChild(componentRef.location.nativeElement);
+            return {
+                componentInstance: componentRef.instance,
+                componentRef: componentRef,
+                destroy() {
+                    componentRef.destroy();
+                }
             }
-        }
+        })
     }
 
     mountCpnt(projectName: string, cpntId: string, cpntAnchor: HTMLElement, props?: any) {
@@ -167,34 +170,43 @@ bridge.resolveVueCpntFactory = function(cpntCotr: any, parent: any) {
     }
 }
 
-bridge.resolveNgCpntFactory2 = function(cpnt: any, ComponentFactory: any, applicationRef: any, injector: any) {
+bridge.resolveNgCpntFactory2 = function(cpnt: any, ComponentFactory: any, applicationRef: any, injector: any, zone: any) {
     return function(props: any) {
-        const componentRef = new ComponentFactory(cpnt).create(injector);
-        if (props) {
-            Object.assign(componentRef.instance, props)
-        }
-        applicationRef.attachView(componentRef.hostView);
         return {
-            componentRef: componentRef,
-            type: 'NG_COMPONENT'
+            type: 'NG_COMPONENT',
+            componentRefPromise: new Promise((resolve) => {
+                zone.run(() => {
+                    const componentRef = new ComponentFactory(cpnt).create(injector);
+                    if (props) {
+                        Object.assign(componentRef.instance, props)
+                    }
+                    applicationRef.attachView(componentRef.hostView);
+                    resolve(componentRef)
+                })
+                
+            })
         }
     }
 }
 
-bridge.resolveNgCpntFactory = function(cpnt: any, ComponentFactoryResolve: any, applicationRef: any, injector: any) {
+bridge.resolveNgCpntFactory = function(cpnt: any, ComponentFactoryResolve: any, applicationRef: any, injector: any, zone: any) {
     return function(props: any) {
-        const componentRef = ComponentFactoryResolve.resolveComponentFactory(cpnt).create(injector);
-        if (props) {
-            Object.assign(componentRef.instance, props)
-        }
-        applicationRef.attachView(componentRef.hostView);
         return {
-            componentRef: componentRef,
-            type: 'NG_COMPONENT'
+            type: 'NG_COMPONENT',
+            componentRefPromise: new Promise(resolve => {
+                zone.run(() => {
+                    const componentRef = ComponentFactoryResolve.resolveComponentFactory(cpnt).create(injector);
+                    if (props) {
+                        Object.assign(componentRef.instance, props)
+                    }
+                    applicationRef.attachView(componentRef.hostView);
+                    resolve(componentRef)
+                })
+            })
         }
     }
 }
 
 bridge.instance = new MicroBridge();
 
-(window as any).$bridge = bridge;
+(window as any).$mcrBridge = bridge;

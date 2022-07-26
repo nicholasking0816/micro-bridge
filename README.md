@@ -1,12 +1,12 @@
 # 介绍
-#### micro-bridge 能够让你以一种比较简单的方式实现微前端项目的组件嵌入功能, ta基于的是前端
-#### 三大框架(react,angular,vue)的动态创建组件的方法。
+mcr-bridge 能够让你以一种比较简单的方式实现微前端项目的组件嵌入功能, ta基于的是前端
+三大框架(react,angular,vue)的动态创建组件的方法。
 
 ## 什么是动态创建组件
-#### 在基于三大框架的前端项目中, 我们要使用一个组件一般都是将组件作为一个标签写在html模板中。
-#### 框架在解析模板时会为组件创建实例并挂载组件视图, 这时候''创建组件实例和挂载组件视图''这
-#### 个过程是由框架来完成的, 而当这个过程是由我们开发者的业务代码来实现时, 那便是动态创建组
-#### 件。
+在基于三大框架的前端项目中, 我们要使用一个组件一般都是将组件作为一个标签写在html模板中。
+框架在解析模板时会为组件创建实例并挂载组件视图, 这时候''创建组件实例和挂载组件视图''这
+个过程是由框架来完成的, 而当这个过程是由我们开发者的业务代码来实现时, 那便是动态创建组
+件。
 
 ## 三大框架动态创建组件的方法
 
@@ -75,8 +75,8 @@ ReactDom.render(React.createElement(App), appContainer)
 ``` 
 
 ## 利用动态创建组件的方法嵌合主子项目
-#### 假如有基于angular的主项目ng_app和基于vue的子项目vue_app, vue_app启动时需要加载js
-#### 文件http://localhost:8080/chunk-vendor.js和http://localhost:8080/app.js。
+假如有基于angular的主项目ng_app和基于vue的子项目vue_app, vue_app启动时需要加载js
+文件http://localhost:8080/chunk-vendor.js和http://localhost:8080/app.js。
 
 #### 首先，在vue_app中添加以下代码
 ```javascript
@@ -151,17 +151,17 @@ export class AppComponent {
   }
 }
 ```
-### 以上就是利用动态创建件组件的方法嵌合主子项目的过程，而micro-bridge封装了一些可以简化以上过程的api
+### 以上就是利用动态创建件组件的方法嵌合主子项目的过程，而mcr-bridge封装了一些可以简化以上过程的api
 
-# 使用micro-bridge
+# 使用mcr-bridge
 
 ## 快速开始
 ```bash
-npm install --save micro-bridge
+npm install --save mcr-bridge
 ```
-## 在主项目中通过micro-bridge嵌入子项目组件
+## 在主项目中通过mcr-bridge嵌入子项目组件
 ```typescript
-import 'micro-bridge';
+import 'mcr-bridge';
 
 ......
 
@@ -195,7 +195,7 @@ export class AppComponent {
 }
 ```
 
-## 在子项目中注册组件到micro-bridge中(子项目中不需要引入micro-bridge)
+## 在子项目中注册组件到mcr-bridge中(子项目中不需要引入mcr-bridge)
 
 ### 1.基于vue的子项目注册组件
 ```javascript
@@ -247,14 +247,15 @@ export class AppComponent {
   constructor(
     private injector: Injector,
     private applicationRef: ApplicationRef,
-    private resolver: ComponentFactoryResolver
+    private resolver: ComponentFactoryResolver,
+    private zone: NgZone
   ) {
 
   }
   ngAfterViewInit() {
     const global: any = window;
     if (global.$bridge) {
-      const factory = global.$bridge.resolveNgCpntFactory(CpntComponent, this.resolver, this.applicationRef, this.injector);
+      const factory = global.$bridge.resolveNgCpntFactory(CpntComponent, this.resolver, this.applicationRef, this.injector, this.zone);
       global.$bridge.instance.registerCpnt(
         'ng_app', // 子项目的唯一标识
         'cpnt', // 子项目组件的唯一标识
@@ -269,7 +270,6 @@ export class AppComponent {
 #### angular13以上的版本
 ```typescript
 import { 
-
     ......
 
     ɵNG_COMP_DEF, 
@@ -287,17 +287,25 @@ import {
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-
+  constructor(
+      private injector: Injector,
+      private applicationRef: ApplicationRef,
+      private resolver: ComponentFactoryResolver,
+      private zone: NgZone
+  ) {
+  
+  }
   ......
 
   ngAfterViewInit() {
     const global: any = window;
     if (global.$bridge) {
       const factory = global.$bridge.resolveNgCpntFactory2(
-        CpntComponent, 
-        new ɵRender3ComponentFactory(CpntComponent[ɵNG_COMP_DEF]), 
+        CpntComponent[ɵNG_COMP_DEF], 
+        ɵRender3ComponentFactory, 
         this.applicationRef, 
-        this.injector
+        this.injector,
+        this.zone
       );
       global.$bridge.instance.registerCpnt(
         'ng_app', // 子项目的唯一标识
@@ -321,12 +329,12 @@ window.$bridge.instance.loadProjectJsonp("vue_app", {
     css:["css/app.30bf6194.css"]}
 );
 ```
-#### 通过webpack生成模式打包编译生成的js文件都会拼上hash代码，这就导致每一次打包编译生成的文件名都不一样,
-#### 而每次打包后都手动更改loadChunks.js的内容显然是很麻烦的事情。
+通过webpack生成模式打包编译生成的js文件都会拼上hash代码，这就导致每一次打包编译生成的文件名都不一样,
+而每次打包后都手动更改loadChunks.js的内容显然是很麻烦的事情。
 
-### 使用micro-bridge-plugin.js 自动生成loadChunks.js文件
+### 使用mcr-bridge-plugin.js 自动生成loadChunks.js文件
 ```javascript
-const MicroBridgePlugin = require('micro-bridge/plugin/micro-bridge-plugin')
+const MicroBridgePlugin = require('mcr-bridge/plugin/mcr-bridge-plugin')
 
 module.exports = {
     plugins: [
@@ -362,7 +370,9 @@ module.exports = {
 在子项目中调用，告诉主项目自已已加载完成。
 
 ### window.$bridge.instance.registerCpnt(projectName: string, componentId: string, componentFactory: Function)
-在子项目中注册组件到micro-bridge。
+在子项目中注册组件到mcr-bridge。
 
 ### window.$bridge.instance.mountCpnt(projectName: string, componentId: string, componentAnchor: HTMLElement, props?: any)
 把子项目的组件挂载带主项目中。
+
+## 如有问题，请邮件联系!! 邮箱：nicholasking0816@168.com
